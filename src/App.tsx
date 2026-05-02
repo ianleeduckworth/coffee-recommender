@@ -5,12 +5,18 @@ import ResultCard from "./components/ResultCard";
 import { coffeeProfiles } from "./data/coffeeProfiles";
 import { quizQuestions } from "./data/questions";
 import { rankRecommendations } from "./lib/scoreQuiz";
-import type { QuizAnswers } from "./types/quiz";
+import type { CaffeineLevel, FlavorCategory, QuizAnswers } from "./types/quiz";
 
-const initialAnswers: QuizAnswers = {
-  caffeine: "medium",
+type QuizDraftAnswers = {
+  caffeine?: CaffeineLevel;
+  roast: number;
+  flavorCategory?: FlavorCategory;
+  fruitLikes: string[];
+  chocolateLikes: string[];
+};
+
+const initialAnswers: QuizDraftAnswers = {
   roast: 50,
-  flavorCategory: "balanced",
   fruitLikes: [],
   chocolateLikes: [],
 };
@@ -20,10 +26,21 @@ type Stage = "landing" | "quiz" | "result";
 export default function App() {
   const [stage, setStage] = useState<Stage>("landing");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<QuizAnswers>(initialAnswers);
+  const [answers, setAnswers] = useState<QuizDraftAnswers>(initialAnswers);
   const [answeredQuestionIds, setAnsweredQuestionIds] = useState<string[]>([]);
 
-  const recommendationResults = useMemo(() => rankRecommendations(answers, coffeeProfiles), [answers]);
+  const finalizedAnswers: QuizAnswers = {
+    caffeine: answers.caffeine ?? "medium",
+    roast: answers.roast,
+    flavorCategory: answers.flavorCategory ?? "balanced",
+    fruitLikes: answers.fruitLikes,
+    chocolateLikes: answers.chocolateLikes,
+  };
+
+  const recommendationResults = useMemo(
+    () => rankRecommendations(finalizedAnswers, coffeeProfiles),
+    [finalizedAnswers]
+  );
 
   const handleNext = () => {
     setAnsweredQuestionIds((prev) => {
@@ -87,7 +104,17 @@ export default function App() {
   }
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
-  const currentValue = answers[currentQuestion.id as keyof QuizAnswers] as string | string[] | number;
+  const currentValue = answers[currentQuestion.id as keyof QuizDraftAnswers] as
+    | string
+    | string[]
+    | number
+    | undefined;
+  const isCurrentQuestionAnswered =
+    currentQuestion.kind === "slider"
+      ? true
+      : currentQuestion.kind === "single"
+        ? typeof currentValue === "string" && currentValue.length > 0
+        : Array.isArray(currentValue) && currentValue.length > 0;
 
   return (
     <main className="app-shell">
@@ -113,7 +140,7 @@ export default function App() {
           <button className="secondary-btn" disabled={currentQuestionIndex === 0} onClick={handleBack} type="button">
             Back
           </button>
-          <button className="primary-btn" onClick={handleNext} type="button">
+          <button className="primary-btn" disabled={!isCurrentQuestionAnswered} onClick={handleNext} type="button">
             {currentQuestionIndex === quizQuestions.length - 1 ? "See Recommendation" : "Next"}
           </button>
         </div>

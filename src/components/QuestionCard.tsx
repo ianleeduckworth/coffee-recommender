@@ -1,6 +1,6 @@
 import type { QuizQuestion } from "../types/quiz";
 
-type AnswerValue = string | string[] | number;
+type AnswerValue = string | string[] | number | undefined;
 
 type QuestionCardProps = {
   question: QuizQuestion;
