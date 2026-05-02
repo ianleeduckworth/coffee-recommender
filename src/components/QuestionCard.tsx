@@ -1,15 +1,34 @@
-import type { QuizQuestion } from "../types/quiz";
+import type { MultiQuestion, SingleQuestion, SliderQuestion } from "../types/quiz";
 
-type AnswerValue = string | string[] | number | undefined;
-
-type QuestionCardProps = {
-  question: QuizQuestion;
-  value: AnswerValue;
-  onChange: (value: AnswerValue) => void;
+type SliderQuestionCardProps = {
+  question: SliderQuestion;
+  value: number;
+  onChange: (value: number) => void;
 };
 
-export default function QuestionCard({ question, value, onChange }: QuestionCardProps) {
-  if (question.kind === "slider") {
+type SingleQuestionCardProps = {
+  question: SingleQuestion;
+  value: string | undefined;
+  onChange: (value: string) => void;
+};
+
+type MultiQuestionCardProps = {
+  question: MultiQuestion;
+  value: string[];
+  onChange: (value: string[]) => void;
+};
+
+type QuestionCardProps = SliderQuestionCardProps | SingleQuestionCardProps | MultiQuestionCardProps;
+
+const isSliderProps = (props: QuestionCardProps): props is SliderQuestionCardProps =>
+  props.question.kind === "slider";
+
+const isSingleProps = (props: QuestionCardProps): props is SingleQuestionCardProps =>
+  props.question.kind === "single";
+
+export default function QuestionCard(props: QuestionCardProps) {
+  if (isSliderProps(props)) {
+    const { question, value, onChange } = props;
     return (
       <div className="question-card">
         <h2>{question.prompt}</h2>
@@ -18,7 +37,7 @@ export default function QuestionCard({ question, value, onChange }: QuestionCard
           type="range"
           min={question.min}
           max={question.max}
-          value={Number(value)}
+          value={value}
           onChange={(event) => onChange(Number(event.target.value))}
         />
         <div className="range-values">
@@ -30,7 +49,8 @@ export default function QuestionCard({ question, value, onChange }: QuestionCard
     );
   }
 
-  if (question.kind === "single") {
+  if (isSingleProps(props)) {
+    const { question, value, onChange } = props;
     return (
       <div className="question-card">
         <h2>{question.prompt}</h2>
@@ -50,7 +70,7 @@ export default function QuestionCard({ question, value, onChange }: QuestionCard
     );
   }
 
-  const selectedValues = Array.isArray(value) ? value : [];
+  const { question, value: selectedValues, onChange } = props;
 
   return (
     <div className="question-card">

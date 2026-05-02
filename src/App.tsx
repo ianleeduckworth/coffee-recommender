@@ -4,16 +4,9 @@ import QuestionCard from "./components/QuestionCard";
 import ResultCard from "./components/ResultCard";
 import { coffeeProfiles } from "./data/coffeeProfiles";
 import { quizQuestions } from "./data/questions";
+import { getQuestionState } from "./lib/quizQuestionState";
 import { rankRecommendations } from "./lib/scoreQuiz";
-import type { CaffeineLevel, FlavorCategory, QuizAnswers } from "./types/quiz";
-
-type QuizDraftAnswers = {
-  caffeine?: CaffeineLevel;
-  roast: number;
-  flavorCategory?: FlavorCategory;
-  fruitLikes: string[];
-  chocolateLikes: string[];
-};
+import type { QuizAnswers, QuizDraftAnswers } from "./types/quiz";
 
 const initialAnswers: QuizDraftAnswers = {
   roast: 50,
@@ -104,17 +97,8 @@ export default function App() {
   }
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
-  const currentValue = answers[currentQuestion.id as keyof QuizDraftAnswers] as
-    | string
-    | string[]
-    | number
-    | undefined;
-  const isCurrentQuestionAnswered =
-    currentQuestion.kind === "slider"
-      ? true
-      : currentQuestion.kind === "single"
-        ? typeof currentValue === "string" && currentValue.length > 0
-        : Array.isArray(currentValue) && currentValue.length > 0;
+  const currentQuestionState = getQuestionState(currentQuestion, answers);
+  const isCurrentQuestionAnswered = currentQuestionState.isAnswered;
 
   return (
     <main className="app-shell">
@@ -125,16 +109,42 @@ export default function App() {
           total={quizQuestions.length}
         />
 
-        <QuestionCard
-          question={currentQuestion}
-          value={currentValue}
-          onChange={(nextValue) => {
-            setAnswers((prev) => ({
-              ...prev,
-              [currentQuestion.id]: nextValue,
-            }));
-          }}
-        />
+        {currentQuestion.kind === "slider" && currentQuestionState.kind === "slider" && (
+          <QuestionCard
+            question={currentQuestion}
+            value={currentQuestionState.value}
+            onChange={(nextValue: number) => {
+              setAnswers((prev) => ({
+                ...prev,
+                [currentQuestion.id]: nextValue,
+              }));
+            }}
+          />
+        )}
+        {currentQuestion.kind === "single" && currentQuestionState.kind === "single" && (
+          <QuestionCard
+            question={currentQuestion}
+            value={currentQuestionState.value}
+            onChange={(nextValue: string) => {
+              setAnswers((prev) => ({
+                ...prev,
+                [currentQuestion.id]: nextValue,
+              }));
+            }}
+          />
+        )}
+        {currentQuestion.kind === "multi" && currentQuestionState.kind === "multi" && (
+          <QuestionCard
+            question={currentQuestion}
+            value={currentQuestionState.value}
+            onChange={(nextValue: string[]) => {
+              setAnswers((prev) => ({
+                ...prev,
+                [currentQuestion.id]: nextValue,
+              }));
+            }}
+          />
+        )}
 
         <div className="actions">
           <button className="secondary-btn" disabled={currentQuestionIndex === 0} onClick={handleBack} type="button">
