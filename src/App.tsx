@@ -21,6 +21,7 @@ export default function App() {
   const [stage, setStage] = useState<Stage>("landing");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>(initialAnswers);
+  const [answeredQuestionIds, setAnsweredQuestionIds] = useState<string[]>([]);
 
   const recommendationResults = useMemo(() => rankRecommendations(answers, coffeeProfiles), [answers]);
 
@@ -39,6 +40,7 @@ export default function App() {
 
   const handleRestart = () => {
     setAnswers(initialAnswers);
+    setAnsweredQuestionIds([]);
     setCurrentQuestionIndex(0);
     setStage("landing");
   };
@@ -81,7 +83,7 @@ export default function App() {
   return (
     <main className="app-shell">
       <section className="panel">
-        <ProgressBar current={currentQuestionIndex + 1} total={quizQuestions.length} />
+        <ProgressBar current={answeredQuestionIds.length} total={quizQuestions.length} />
 
         <QuestionCard
           question={currentQuestion}
@@ -91,6 +93,13 @@ export default function App() {
               ...prev,
               [currentQuestion.id]: nextValue,
             }));
+            setAnsweredQuestionIds((prev) => {
+              if (prev.includes(currentQuestion.id)) {
+                return prev;
+              }
+
+              return [...prev, currentQuestion.id];
+            });
           }}
         />
 
