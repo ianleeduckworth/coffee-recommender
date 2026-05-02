@@ -26,6 +26,15 @@ export default function App() {
   const recommendationResults = useMemo(() => rankRecommendations(answers, coffeeProfiles), [answers]);
 
   const handleNext = () => {
+    setAnsweredQuestionIds((prev) => {
+      const questionId = quizQuestions[currentQuestionIndex].id;
+      if (prev.includes(questionId)) {
+        return prev;
+      }
+
+      return [...prev, questionId];
+    });
+
     if (currentQuestionIndex < quizQuestions.length - 1) {
       setCurrentQuestionIndex((index) => index + 1);
       return;
@@ -97,13 +106,6 @@ export default function App() {
               ...prev,
               [currentQuestion.id]: nextValue,
             }));
-            setAnsweredQuestionIds((prev) => {
-              if (prev.includes(currentQuestion.id)) {
-                return prev;
-              }
-
-              return [...prev, currentQuestion.id];
-            });
           }}
         />
 
