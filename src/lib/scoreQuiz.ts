@@ -1,4 +1,5 @@
 import type { CaffeineLevel, CoffeeProfile, QuizAnswers, RecommendationResult } from "../types/quiz";
+import { scoringWeights } from "../data/scoringWeights";
 
 const caffeineScoreMap: Record<CaffeineLevel, number> = {
   low: 0,
@@ -29,7 +30,11 @@ export const scoreProfile = (answers: QuizAnswers, profile: CoffeeProfile): Reco
   const flavorMatch = answers.flavorCategory === profile.target.flavorCategory ? 100 : 35;
 
   const weightedScore =
-    caffeineMatch * 0.2 + roastMatch * 0.25 + fruitMatch * 0.2 + chocolateMatch * 0.2 + flavorMatch * 0.15;
+    caffeineMatch * scoringWeights.caffeine +
+    roastMatch * scoringWeights.roast +
+    fruitMatch * scoringWeights.fruit +
+    chocolateMatch * scoringWeights.chocolate +
+    flavorMatch * scoringWeights.flavor;
 
   const reasons: string[] = [];
   if (roastMatch >= 75) reasons.push("Matches your preferred roast depth.");
