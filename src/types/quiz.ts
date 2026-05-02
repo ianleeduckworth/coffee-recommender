@@ -49,10 +49,19 @@ export type SliderQuestion<TId extends SliderQuestionId = SliderQuestionId> = Qu
 
 export type QuizQuestion = SingleQuestion | MultiQuestion | SliderQuestion;
 
+/** Branded retail product link for outbound sales picks (e.g. Target). */
+export type CoffeeRetailPick = {
+  url: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+};
+
 export type CoffeeProfile = {
   id: string;
   name: string;
   description: string;
+  retailPicks: CoffeeRetailPick[];
   target: {
     caffeine: CaffeineLevel;
     roast: number;

@@ -6,6 +6,7 @@ import { coffeeProfiles } from "./data/coffeeProfiles";
 import { quizQuestions } from "./data/questions";
 import { getQuestionState } from "./lib/quizQuestionState";
 import { rankRecommendations } from "./lib/scoreQuiz";
+import { selectTopRetailPicks } from "./lib/selectTopRetailPicks";
 import type { QuizAnswers, QuizDraftAnswers } from "./types/quiz";
 
 const initialAnswers: QuizDraftAnswers = {
@@ -34,6 +35,8 @@ export default function App() {
     () => rankRecommendations(finalizedAnswers, coffeeProfiles),
     [finalizedAnswers]
   );
+
+  const topRetailPicks = useMemo(() => selectTopRetailPicks(recommendationResults, 3), [recommendationResults]);
 
   const handleNext = () => {
     setAnsweredQuestionIds((prev) => {
@@ -85,10 +88,11 @@ export default function App() {
   if (stage === "result") {
     return (
       <main className="app-shell">
-        <section className="panel">
+        <section className="panel panel-result">
           <ResultCard
             topRecommendation={recommendationResults[0]}
             alternates={recommendationResults.slice(1, 3)}
+            retailPicks={topRetailPicks}
             onRestart={handleRestart}
           />
         </section>
