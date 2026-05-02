@@ -83,7 +83,11 @@ export default function App() {
   return (
     <main className="app-shell">
       <section className="panel">
-        <ProgressBar current={answeredQuestionIds.length} total={quizQuestions.length} />
+        <ProgressBar
+          questionNumber={currentQuestionIndex + 1}
+          answeredCount={answeredQuestionIds.length}
+          total={quizQuestions.length}
+        />
 
         <QuestionCard
           question={currentQuestion}
